@@ -1,0 +1,167 @@
+<div class="min-h-screen bg-cyan-50" *ngIf="items.length > 0">
+    <app-navbar></app-navbar>
+    <label class="flex justify-center mt-10 mb-10 text-xl font-extrabold"
+      >Data Item</label
+    >
+    <div class="p-10 mx-16 bg-white rounded-md shadow-md laptop:mx-44">
+      <div class="flex justify-between mb-5">
+        <input
+          type="text"
+          id="searchItem"
+          placeholder="Find Item"
+          class="w-3/5 p-2 border rounded tablet:w-64 border-orange-700"
+          [(ngModel)]="searchItemName"
+          (input)="searchItems()"
+        />
+        <button
+          class="p-2 text-xs text-white rounded-md laptop:text-base bg-orange-600 hover:bg-orange-500"
+          (click)="goAddItem()"
+        >
+          Add Item
+        </button>
+      </div>
+      <div>
+        <div class="flex items-center justify-end mb-4 text-xs laptop:text-sm">
+          <label for="sortDirection" class="mr-2">Sort By Item Name:</label>
+          <select
+            id="sortDirection"
+            class="p-2 border rounded"
+            [(ngModel)]="sortDirection"
+            (change)="sortItems()"
+          >
+            <option value="asc">A-Z</option>
+            <option value="desc">Z-A</option>
+          </select>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white border-collapse">
+            <thead class="text-sm laptop:text-base">
+              <tr>
+                <th class="p-2 border-b">Item Name</th>
+                <th class="p-2 border-b">Item Code</th>
+                <th class="p-2 border-b">Stock</th>
+                <th class="p-2 border-b">Price</th>
+                <th class="p-2 border-b">Available</th>
+                <th class="p-2 border-b">Last Re-Stock</th>
+                <th class="p-2 border-b">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let item of items"
+                class="text-xs border-b tablet:text-sm laptop:text-base"
+              >
+                <td class="p-1 text-center min-w-[6rem]">{{ item.itemName }}</td>
+                <td class="p-1 text-center min-w-[6rem]">
+                  {{ item.itemCode }}
+                </td>
+                <td class="p-1 text-center min-w-[2rem]">{{ item.stock }}</td>
+                <td class="p-1 text-center min-w-[6rem]">
+                  {{ formatRupiah(item.price) }}
+                </td>
+                <td class="text-xl p-1 text-center min-w-[4rem]">
+                  <fa-icon
+                    [icon]="item.isAvailable ? faCheck : faTimes"
+                    [ngClass]="{
+                      'text-green-500': item.isAvailable,
+                      'text-red-500': !item.isAvailable
+                    }"
+                  ></fa-icon>
+                </td>
+                <td class="p-1 text-center min-w-[7rem]">
+                  {{ item.lastReStock | date: 'MMMM d, y, h:mm a' }}
+                </td>
+                <td class="p-1 text-center min-w-[7em]">
+                  <!-- <button
+                    (click)="goDetailItem(item.idItems)"
+                    class="m-1 laptop:m-2"
+                  >
+                    <fa-icon [icon]="faEye"></fa-icon>
+                  </button> -->
+                  <button
+                    (click)="goEditItem(item.idItems)"
+                    class="m-1 laptop:m-2"
+                  >
+                    <fa-icon [icon]="faEdit"></fa-icon>
+                  </button>
+                  <button
+                    (click)="
+                      openDeleteConfirmationModal(item.idItems, item.itemName)
+                    "
+                    class="m-1 laptop:m-2"
+                  >
+                    <fa-icon [icon]="faTrash"></fa-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div
+          class="flex justify-between mt-4 text-xs text-white tablet:text-sm laptop:text-base"
+        >
+        <div class="text-black">
+          <label for="pageSize" class="mr-2">Entries:</label>
+          <select
+            class="p-2 border rounded"
+            [(ngModel)]="pageSize"
+            (change)="pageSizeItems()"
+            defaultValue="7"
+          >
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="30">30</option>
+          </select>
+        </div>
+          <div>
+            <button
+            [disabled]="currentPage === 1"
+            (click)="onPageChange(currentPage - 1)"
+            class="p-2 border rounded bg-orange-600 hover:bg-orange-500"
+          >
+            Previous
+          </button>
+          <span class="mx-2 mt-2 text-black"
+            >{{ currentPage }} / {{ totalPages }}</span
+          >
+          <button
+            [disabled]="currentPage === totalPages"
+            (click)="onPageChange(currentPage + 1)"
+            class="p-2 border rounded-md bg-orange-600 hover:bg-orange-500"
+          >
+            Next
+          </button>
+          </div>
+        </div>
+    </div>
+    <div class="p-5"></div>
+  </div>
+  <!-- Modal Konfirmasi Hapus -->
+  <div
+    *ngIf="isModalOpen"
+    class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+  >
+    <div class="p-4 bg-white rounded shadow-md">
+      <h2 class="mb-4 text-xl font-bold">Konfirmasi Hapus</h2>
+      <p class="mb-4">
+        Apakah ingin menghapus item
+        <strong>"{{ itemNameToDelete }}"</strong> ?
+      </p>
+      <div class="flex justify-end">
+        <button
+          (click)="closeDeleteConfirmationModal()"
+          class="p-2 mr-2 text-white bg-gray-500 rounded"
+        >
+          No
+        </button>
+        <button
+          (click)="confirmDeleteItem()"
+          class="p-2 text-white bg-red-500 rounded"
+        >
+          Yes
+        </button>
+      </div>
+    </div>
+    
+  </div>

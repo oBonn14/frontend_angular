@@ -1,0 +1,183 @@
+<div class="min-h-screen  bg-cyan-50" >
+    <app-navbar></app-navbar>
+    <label class="flex justify-center mt-10 mb-10 text-xl font-extrabold"
+      >Data Customer</label
+    >
+    <div class="p-10 mx-16 bg-white mb-10 rounded-md shadow-md laptop:mx-44">
+      <div class="flex justify-between mb-5">
+        <input
+          type="text"
+          placeholder="Find Customer"
+          class="w-3/5 p-2 border rounded tablet:w-64 border-orange-700"
+          [(ngModel)]="searchCustomerName"
+          (input)="searchCustomers()"
+        />
+        <button
+          class="p-2 text-xs text-white rounded-md laptop:text-base bg-orange-600 hover:bg-orange-500"
+          (click)="goAddCustomer()"
+        >
+          Add Customer
+        </button>
+      </div>
+      <div>
+        <div class="flex items-center justify-end mb-4 text-xs laptop:text-sm">
+          <label for="sortDirection " class="mr-2">Sort By Name:</label>
+          <select
+            id="sortDirection"
+            class="p-2 border rounded"
+            [(ngModel)]="sortDirection"
+            (change)="sortCustomers()"
+          >
+            <option value="asc">A-Z</option>
+            <option value="desc">Z-A</option>
+          </select>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white border-collapse">
+            <thead class="text-sm laptop:text-base">
+              <tr>
+                <th class="p-2 border-b">Profile</th>
+                <th class="p-2 border-b">Name</th>
+                <th class="p-2 border-b">Address</th>
+                <th class="p-2 border-b">No Handphone</th>
+                <th class="p-2 border-b">Customer Code</th>
+                <th class="p-2 border-b">Active</th>
+                <!-- <th class="p-2 border-b">Last Order Date</th> -->
+                <th class="p-2 border-b">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let customer of customers"
+                class="text-xs border-b tablet:text-sm laptop:text-base"
+              >
+                <td class="flex justify-center p-2 min-w-[6rem]">
+                  <img
+                    *ngIf="customer.pic"
+                    [src]="customer.pic"
+                    alt="Customer Picture"
+                    class="transition-all duration-300 rounded-full shadow-2xl w-14 h-14 laptop:w-20 laptop:h-20 hover:w-20 hover:h-20 laptop:hover:w-24 laptop:hover:h-24"
+                  />
+                </td>
+                <td class="p-1 text-center min-w-[6rem]">
+                  {{ customer.customerName }}
+                </td>
+                <td class="p-1 text-center min-w-[8rem] max-w-[10rem]">
+                  {{ customer.customerAddress }}
+                </td>
+                <td class="p-1 text-center min-w-[8rem] max-w-[10rem]">
+                  {{ customer.customerNumber }}
+                </td>
+                <td class="p-1 text-center min-w-[8rem]">
+                  {{ customer.customerCode }}
+                </td>
+                <td class="p-1 text-xl text-center min-w-[2rem]">
+                  <fa-icon
+                    [icon]="customer.active ? faCheck : faTimes"
+                    [ngClass]="{
+                      'text-green-500': customer.active,
+                      'text-red-500': !customer.active
+                    }"
+                  ></fa-icon>
+                </td>
+                <!-- <td class="p-1 text-center min-w-[8rem]">
+                  {{ customer.lastOrderDate | date: 'MMMM d, y, h:mm a' }}
+                </td> -->
+  
+                <td class="p-1 text-center min-w-[7rem]">
+                  <!-- <button
+                    (click)="goDetailCustomer(customer.idCustomer)"
+                    class="m-1 laptop:m-2"
+                  >
+                    <fa-icon [icon]="faEye"></fa-icon>
+                  </button> -->
+                  <button
+                    (click)="goEditCustomer(customer.idCustomer)"
+                    class="m-1 laptop:m-2"
+                  >
+                    <fa-icon [icon]="faEdit"></fa-icon>
+                  </button>
+                  <button
+                    (click)="
+                      openDeleteConfirmationModal(
+                        customer.idCustomer,
+                        customer.customerName
+                      )
+                    "
+                    class="m-1 laptop:m-2"
+                  >
+                    <fa-icon [icon]="faTrash"></fa-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div
+          class="flex justify-between mt-4 text-xs text-white tablet:text-sm laptop:text-base"
+        >
+        <div class="text-black">
+          <label for="pageSize" class="mr-2">Entries:</label>
+          <select
+            class="p-2 border rounded"
+            [(ngModel)]="pageSize"
+            (change)="pageSizeCustomers()"
+            defaultValue="4"
+          >
+            <option value="4">4</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+          <div>
+            <button
+            [disabled]="currentPage === 1"
+            (click)="onPageChange(currentPage - 1)"
+            class="p-2 border rounded bg-orange-600 hover:bg-orange-500"
+          >
+            Previous
+          </button>
+          <span class="mx-2 mt-2 text-black"
+            >{{ currentPage }} / {{ totalPages }}</span
+          >
+          <button
+            [disabled]="currentPage === totalPages"
+            (click)="onPageChange(currentPage + 1)"
+            class="p-2 border rounded-md bg-orange-600 hover:bg-orange-500"
+          >
+            Next
+          </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="p-3"></div>
+  </div>
+  
+  <!-- Modal Konfirmasi Hapus -->
+  <div
+    *ngIf="isModalOpen"
+    class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+  >
+    <div class="p-4 bg-white rounded shadow-md">
+      <h2 class="mb-4 text-xl font-bold">Konfirmasi Hapus</h2>
+      <p class="mb-4">
+        Apakah ingin menghapus customer
+        <strong>"{{ customerNameToDelete }}"</strong> ?
+      </p>
+      <div class="flex justify-end">
+        <button
+          (click)="closeDeleteConfirmationModal()"
+          class="p-2 mr-2 text-white bg-gray-500 rounded"
+        >
+          No
+        </button>
+        <button
+          (click)="confirmDeleteCustomer()"
+          class="p-2 text-white bg-red-500 rounded"
+        >
+          Yes
+        </button>
+      </div>
+    </div>
+  </div>
